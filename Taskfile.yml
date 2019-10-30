@@ -1,0 +1,27 @@
+# https://taskfile.dev
+
+version: '2'
+
+env:
+  DOCKER_IMAGE: travis-go-dockerhub
+  DOCKER_TAG: latest
+
+tasks:
+  build:
+    dir: bin
+    cmds:
+      - go build ../cmd/hello
+  docker-build:
+    cmds:
+      - docker build -t $DOCKER_USERNAME/$DOCKER_IMAGE:$DOCKER_TAG .
+  docker-smoke:
+    cmds:
+      - docker run --interactive --tty $DOCKER_USERNAME/$DOCKER_IMAGE:$DOCKER_TAG /bin/hello
+  docker-login:
+    silent: true
+    cmds:
+      - docker login -u $DOCKER_USERNAME -p $DOCKER_TOKEN 2> /dev/null
+  docker-push:
+    deps: [docker-login]
+    cmds:
+      - docker push $DOCKER_USERNAME/$DOCKER_IMAGE:$DOCKER_TAG
