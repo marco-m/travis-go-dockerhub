@@ -1,0 +1,4 @@
+TODO
+
+* tests
+* making a release: from git tag to docker tag!
