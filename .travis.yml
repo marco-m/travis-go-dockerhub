@@ -1,0 +1,24 @@
+dist: bionic
+language: minimal
+
+git:
+  depth: 2
+
+env:
+  global:
+  - PATH=bin:$PATH
+  - DOCKER_USERNAME=marcomm
+  - secure: W/Z1T5tsp3AjwScMeLPBqgHHlcbQCnxjV/NgykDtqLFcX/Jv1Xyr/7Sc3Zi6HDYPwBY+81K5xGYJ0vWaExYL6G9GCgNQAzbzdo5/FZjVr3y3wta6XYeRg/7Jg/YO6JxiDKVQhqdBFWY1lSEYM3jmO1AHIW5xbcGvd9IK3MAxAGPOx3L1fY49Oyi+hZrpHt5mPQ2jnstHLIGnvpNcsLhIyS85mNoKS3Gu0go9cOdT8VYb4spbp3azyDsxmQMNnx5cUEUgVehpdHoR9yKMZyO2puwcCS+jV8TkZjnvGf/cBJ3yVvZtR1XmYt7NroTiwKSCrZB8nYMNRjtylgo8BZGY+KQs4Motq8IiIB915M1q//AG6gNF/fSQ15GUVzf1J8mOURv8qYUIt4cmaX07zo/a94AFzQO3YYQYtTgWhmXwlmU/aZdauQVlmtYPbEDOkBsniG8twek7F6TWi9HkN4JTyK2QrSscVQwESgg6z14JeWwawEh57ocz4u2Lu73nh1OAllLo7Lg6g/Ohlnp2jRS+Vq0fMZoiYxyp+NFqwLKEIC3dDKSYBRVlUgJzKleB2KtD6QUZ8PtZxN8LkWG0R68bnMk+tSdrgXUE7vbLDMLO4YpPuS+ElBUzMVFz0bBEUBnwpDAjnhOnv5SieMlY0oKHXIhMMdfH393ehRU8TDoeIhg=
+
+services:
+- docker
+
+install:
+- curl --silent --location https://taskfile.dev/install.sh | sh
+- which task
+- task --version
+
+script:
+- task docker-build
+- task docker-smoke
+- task docker-push
