@@ -37,13 +37,17 @@ See
 * The file `travis.yml` in this repo.
 * The file `Taskfile.yml` in this repo.
 
-## Docker tags and branches
+## Releases and tags
 
-Each time a commit is made on branch `BRANCH`, and CI runs successfully, a new Docker image will be pushed with tag `BRANCH-latest`.
+Each time a commit is made on a branch, a new Docker image will be pushed with a tag corresponding to the branch name. This is done to enable integration testing of the image before merging.
+
+If a branch is tagged (you should tag only the default branch), then a new Docker image will be pushed with the corresponding tag, without the optional `v` prefix.
 
 For example:
 
 ![DockerHub tags](docs/dockerhub-tags.png)
+
+**NOT YET, FIXME:** Each time a release is made, the `latest` tag is updated.
 
 ## Local build
 
@@ -70,8 +74,9 @@ travis-docker.THE_SECRET: 42
 ### Build
 
 ```
-$ task test
-$ task build
+$ envchain travis-docker task test
+$ envchain travis-docker task build
+
 $ envchain travis-docker task docker-build
 $ envchain travis-docker task docker-smoke
 $ envchain travis-docker task docker-push
