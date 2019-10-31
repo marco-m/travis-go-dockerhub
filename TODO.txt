@@ -1,4 +1,4 @@
 TODO
 
-* tests
+* tests within the container
 * making a release: from git tag to docker tag!

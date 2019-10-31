@@ -1,14 +1,18 @@
 dist: bionic
-language: minimal
+language: go
+
+go:
+- 1.x
 
 git:
   depth: 2
 
 env:
   global:
+  - GO111MODULE=on
   - PATH=bin:$PATH
   - DOCKER_USERNAME=marcomm
-  - secure: W/Z1T5tsp3AjwScMeLPBqgHHlcbQCnxjV/NgykDtqLFcX/Jv1Xyr/7Sc3Zi6HDYPwBY+81K5xGYJ0vWaExYL6G9GCgNQAzbzdo5/FZjVr3y3wta6XYeRg/7Jg/YO6JxiDKVQhqdBFWY1lSEYM3jmO1AHIW5xbcGvd9IK3MAxAGPOx3L1fY49Oyi+hZrpHt5mPQ2jnstHLIGnvpNcsLhIyS85mNoKS3Gu0go9cOdT8VYb4spbp3azyDsxmQMNnx5cUEUgVehpdHoR9yKMZyO2puwcCS+jV8TkZjnvGf/cBJ3yVvZtR1XmYt7NroTiwKSCrZB8nYMNRjtylgo8BZGY+KQs4Motq8IiIB915M1q//AG6gNF/fSQ15GUVzf1J8mOURv8qYUIt4cmaX07zo/a94AFzQO3YYQYtTgWhmXwlmU/aZdauQVlmtYPbEDOkBsniG8twek7F6TWi9HkN4JTyK2QrSscVQwESgg6z14JeWwawEh57ocz4u2Lu73nh1OAllLo7Lg6g/Ohlnp2jRS+Vq0fMZoiYxyp+NFqwLKEIC3dDKSYBRVlUgJzKleB2KtD6QUZ8PtZxN8LkWG0R68bnMk+tSdrgXUE7vbLDMLO4YpPuS+ElBUzMVFz0bBEUBnwpDAjnhOnv5SieMlY0oKHXIhMMdfH393ehRU8TDoeIhg=
+  - secure: "m/Kx4rY9E/rEYc9DoZNfZS/SBoY0zgolg/me6BWOv2gmPXdCVeN1EGMAwleE+NO8YNP1w7Ze65XPpPFE9ePuP8Lgwo0ORWFe82V0DNQaAyrpGnXHJ9bv+ftajrjBXVR6tl28apenlJt/IYWsr2ssU9azAn/BcSvb+SY4FAilf1+ijMHiXPes2c4tvx3m/pmro8ARBsYR7mzmIgWFgVeDpVZBn1rJr8/Arc/0MP15QwBbnZlhviE+9/D7fiJTjIFlC54b5VnLT7IzzoYTWEe0qmYr1UTCxBoaVbXl4htvuG53FcBEDEFiKdSnVRFuyKmIN9PC0rqzO+9Eu5j4TOkr1mOaaS6JmBECrKf/FuG82job5eRzIrygBB9EH+tyZ9+yxeF6NURt3vww/HhKPuBmCg/SVGQUIv/u7VN3THp6sOqEUPN1v/FhYbliS4Nu83zpqlSEQACCqa00L8OREFK4ca35fRNBTEMd9CJE/EMcOiHbGqh7YdW0hXgcrXz1B4g2++/T4SomDyoKJ2i400kiZYpiyndIPDdilIMcP/bOVjwvk554TT7SGwK1PQ73FOEQPnxwOf23AuTsRvBDlNnUpQ8ARlLXT9Kkd4urAqVALObycsz8BjYRHkVhWVfrdByl1uGC74rT6IMcQUwZShjB22aenvZyohZY1i/amAwvuLk="
 
 services:
 - docker
@@ -19,6 +23,9 @@ install:
 - task --version
 
 script:
-- task docker-build
-- task docker-smoke
-- task docker-push
+# This is to fail fast, see https://github.com/travis-ci/travis-ci/issues/1066
+# :-(
+- task test || exit 1
+- task docker-build || exit 1
+- task docker-smoke || exit 1
+- task docker-push || exit 1

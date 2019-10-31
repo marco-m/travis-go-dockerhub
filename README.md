@@ -23,7 +23,8 @@ $ cd the-repo
 $ travis encrypt --add -i
 Detected repository as marco-m/travis-go-dockerhub, is this correct? |yes|
 Reading from stdin, press Ctrl+D when done
-DOCKER_TOKEN="YOUR_TOKEN_CREATED_ABOVE"
+DOCKER_TOKEN="YOUR_TOKEN"  <= this is a real secret
+THE_SECRET="42"            <= this shows how to pass additional secrets; see the tests
 ```
 
 The `--add` will add the entry to the `.travis.yml` file.
@@ -40,6 +41,10 @@ See
 
 Each time a commit is made on branch `BRANCH`, and CI runs successfully, a new Docker image will be pushed with tag `BRANCH-latest`.
 
+For example:
+
+![DockerHub tags](docs/dockerhub-tags.png)
+
 ## Local build
 
 The same Taskfile can be used for local builds, for CI builds and inside a Docker container.
@@ -54,12 +59,18 @@ We suggest to use [envchain](https://github.com/sorah/envchain) or [gopass](http
 
 ```
 envchain --set travis-docker DOCKER_USERNAME
-envchain --set travis-docker DOCKER_TOKEN
+
+$ envchain --set travis-docker DOCKER_TOKEN
+travis-docker.DOCKER_TOKEN: YOUR_TOKEN_HERE
+
+$ envchain --set travis-docker THE_SECRET
+travis-docker.THE_SECRET: 42
 ```
 
 ### Build
 
 ```
+$ task test
 $ task build
 $ envchain travis-docker task docker-build
 $ envchain travis-docker task docker-smoke
