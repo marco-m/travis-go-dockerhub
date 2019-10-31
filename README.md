@@ -36,6 +36,10 @@ See
 * The file `travis.yml` in this repo.
 * The file `Taskfile.yml` in this repo.
 
+## Docker tags and branches
+
+Each time a commit is made on branch `BRANCH`, and CI runs successfully, a new Docker image will be pushed with tag `BRANCH-latest`.
+
 ## Local build
 
 The same Taskfile can be used for local builds, for CI builds and inside a Docker container.
@@ -61,7 +65,3 @@ $ envchain travis-docker task docker-build
 $ envchain travis-docker task docker-smoke
 $ envchain travis-docker task docker-push
 ```
-
-## TODO
-
-* making a release: from git tag to docker tag!
