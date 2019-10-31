@@ -6,6 +6,9 @@ env:
   DOCKER_IMAGE: travis-go-dockerhub
 
 tasks:
+  test:
+    cmds:
+      - go test ./hello
   build:
     dir: bin
     cmds:
