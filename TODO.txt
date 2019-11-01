@@ -1,4 +1,19 @@
 TODO
 
+* if building for a git tag, generate also Docker tag `latest`
+
+Also the convention to use moving tags for all releases except a patch release, that I understand.
+
+https://medium.com/@mccode/using-semantic-versioning-for-docker-image-tags-dfde8be06699
+
+    registry:2.6.2
+    registry:2.6
+    registry:2
+    registry:latest
+
+    When Docker pushes version 2.6.3, they will overwrite all but the 2.6.2 tag. 
+
+
+
+
 * tests within the container
-* making a release: from git tag to docker tag!
