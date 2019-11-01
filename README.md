@@ -39,6 +39,8 @@ See
 
 ## Releases and tags
 
+With reference to the corresponding [repository on DockerHub](https://cloud.docker.com/repository/docker/marcomm/travis-go-dockerhub/general):
+
 Each time a commit is made on a branch, a new Docker image will be pushed with a tag corresponding to the branch name. This is done to enable integration testing of the image before merging.
 
 If a branch is tagged (you should tag only the default branch), then a new Docker image will be pushed with the corresponding tag, without the optional `v` prefix.

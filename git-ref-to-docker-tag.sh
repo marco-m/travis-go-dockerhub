@@ -1,6 +1,6 @@
 #! /bin/bash
 
-# Return the git tag if any, without the optional "v" prefix, otherwise the branch name.
+# Returns the git tag if any, without the optional "v" prefix, otherwise the branch name.
 # Works both locally and on Travis.
 
 
