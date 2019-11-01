@@ -37,19 +37,28 @@ See
 * The file `travis.yml` in this repo.
 * The file `Taskfile.yml` in this repo.
 
-## Releases and tags
+## Releases, git and Docker tags
 
 With reference to the corresponding [repository on DockerHub](https://cloud.docker.com/repository/docker/marcomm/travis-go-dockerhub/general):
 
-Each time a commit is made on a branch, a new Docker image will be pushed with a tag corresponding to the branch name. This is done to enable integration testing of the image before merging.
+Each time a commit is made on a branch, a new Docker image will be pushed with a tag corresponding to the branch name. This is done to enable integration testing of the image before merging. Said in another way: the Docker tag with the branch name always gives you an image built off the current tip of the branch.
 
-If a branch is tagged (you should tag only the default branch), then a new Docker image will be pushed with the corresponding tag, without the optional `v` prefix.
+Making a release.
 
-For example:
+If a branch is tagged (you should tag only the default branch), a new Docker image will be built and will be pushed with two tags:
 
-![DockerHub tags](docs/dockerhub-tags.png)
+1. Same Docker tag as the git tag, without the optional `v` prefix. For example, git tag `v1.2.3` will become DOcker tag `1.2.3`.
+2. The `latest` Docker tag. If git tags are made only on the default branch, then Docker tag `latest` represents the latest release of the project, not the latest commit to the default branch. As such, it is as stable as pinning a specific release.
 
-**NOT YET, FIXME:** Each time a release is made, the `latest` tag is updated.
+```
+$ git tag -a -m 'Release 0.0.2' v0.0.2
+git push origin v0.0.2
+```
+
+### Currently missing features
+
+- Moving tags for partial semver, for example `1.2.3` is fixed, but `1.2` should give the latest release in the `1.2.x` series and `1` should give the latest release in the `1.x` series.
+- **BUG**: If you support two series of releases, say `1.2.x` and `1.3.x`, then tag `latest` will flip between the two series! Currently tag `latest` works fine as long as you support only one series of releases.
 
 ## Local build
 
