@@ -22,10 +22,13 @@ install:
 - which task
 - task --version
 
-script:
-# This is to fail fast, see https://github.com/travis-ci/travis-ci/issues/1066
-# :-(
-- task test || exit 1
-- task docker-build || exit 1
-- task docker-smoke || exit 1
-- task docker-push || exit 1
+# NOTE
+# Travis `script` is bundled into a custom shell script behind our back and keeps running also
+# if a step fails. :-(
+# See:
+# - https://github.com/travis-ci/travis-ci/issues/1066
+# - https://docs.travis-ci.com/user/job-lifecycle/#customizing-the-build-phase
+# We cannot use `exit` directly, see
+# https://docs.travis-ci.com/user/job-lifecycle/#how-does-this-work-or-why-you-should-not-use-exit-in-build-steps
+# The problem of all this is the lack of visibility (the failing step is not highlighted)
+script: ci/travis.sh

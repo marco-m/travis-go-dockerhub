@@ -38,6 +38,6 @@ tasks:
         fi
     env:
       DOCKER_TAG:
-        sh: ./git-ref-to-docker-tag.sh
+        sh: ci/git-ref-to-docker-tag.sh
       DOCKER_LATEST:
-        sh: ./git-latest.sh
+        sh: ci/git-latest.sh
