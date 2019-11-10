@@ -1,5 +1,18 @@
 TODO
 
+* The tag "latest" should be added to an image in a way that the date is exactly the same. Currently there is a difference of a few seconds and this is super confusing:
+
+$ http https://hub.docker.com/v2/repositories/marcomm/travis-go-dockerhub/tags | jq '.results[] | {tag: .name, date: .last_updated}'
+{
+  "tag": "latest",
+  "date": "2019-11-01T10:24:19.118637Z"
+}
+{
+  "tag": "0.0.2",
+  "date": "2019-11-01T10:24:17.98732Z"
+}
+
+
 * Moving stable tags.
 
 Also the convention to use moving tags for all releases except a patch release, that I understand.
