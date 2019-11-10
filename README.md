@@ -1,22 +1,47 @@
+# Travis Go DockerHub
+
 [![Travis Build Status](https://travis-ci.org/marco-m/travis-go-dockerhub.svg?branch=master)](https://travis-ci.org/marco-m/travis-go-dockerhub)
 
-How to use TravisCI to build Go code in a Docker image and publish to DockerHub.
+How to use TravisCI to build and test Go code for a Docker image and publish the image to DockerHub. Supports issuing releases based on git tags. The Docker images are tagged following best practices (moving stable tags).
 
-## WORK IN PROGRESS
+## Status
 
-## DockerHub token setup
+Work in progress.
 
-Do now use your DockerHub password, create a dedicated access token instead, see documentation at [dockerhub access tokens](https://docs.docker.com/docker-hub/access-tokens/). Login to your account and go to Settings | Security. Create a token, give it a name such as `Travis` and securely back it up in your OS key store.
+### Currently missing features
 
-The token can be used with `docker login` as if it was a password.
+- Moving stable tags, for example `1.2.3` is fixed, but `1.2` should give the latest release in the `1.2.x` series and `1` should give the latest release in the `1.x` series.
+- **BUG**: If you support two series of releases, say `1.2.x` and `1.3.x`, then tag `latest` will flip between the two series! Currently tag `latest` works fine as long as you support only one series of releases.
 
-## Travis token setup
+## Secure setup for secrets
 
-Follow the [travis encryption-keys](https://docs.travis-ci.com/user/encryption-keys/) documentation to install the `travis` CLI.
+We need to give credentials to Travis to publish the Docker image to our DockerHub (or other Docker registry) account. We want to do it in such a way to preserve the secrecy of the credentials and to control what happens when somebody not belonging to the project issues a PR.
 
-For macOS, `brew install travis` just works.
+### DockerHub token setup
 
-Do not follow the documentation example (`travis encrypt SOMEVAR="secretvalue"`), because it would leave the secrets in the shell history. Instead, run the tool in interactive mode.
+Do now use your DockerHub password, instead create a dedicated access token, see documentation at [dockerhub access tokens](https://docs.docker.com/docker-hub/access-tokens/). This allows to:
+
+1. Reduce exposure (principle of least privilege), since a token has less capabilities than an account password.
+2. Enable auditing of token usage.
+3. Enable token revocation.
+
+Unfortunately it is not possible to limit the scope of a token to a given image repository: a token has access to all repositories of an account. Nonetheless, it still makes sense to use a separate token per image repository, since it enables better auditing.
+
+Login to your account and go to Settings | Security. Create a token, give it a name such as `Travis Project Foo` and securely back it up in your OS key store.
+
+From an API point of view, the token can be used with `docker login` as if it was a password.
+
+### Travis secrets setup
+
+Please read the reference documentation [travis encryption-keys] before continuing.
+
+The main idea is to store the secrets in the source repository (the repository containing the `.travis.yml` file), using the encrypted environment variables feature of Travis.
+
+Note that this feature, for security reasons, does NOT make secure environment variables available to PRs coming from a forked source repository.
+
+The [travis encryption-keys] documentation contains also pointers to the `travis` CLI. For macOS, `brew install travis` just works.
+
+Do not follow the documentation example (`travis encrypt SOMEVAR="secretvalue"`) because it would leave the secrets in the shell history. Instead, run the tool in interactive mode with the `-i` flag:
 
 ```
 $ cd the-repo
@@ -29,17 +54,17 @@ THE_SECRET="42"            <= this shows how to pass additional secrets; see the
 
 The `--add` will add the entry to the `.travis.yml` file.
 
-## Travis Docker build
+All the encrypted secrets are defined in the `.travis.yml` file under key `secure`.
 
-See
+### Risk analysis
 
-* The Travis documentation [Using Docker in Builds](https://docs.travis-ci.com/user/docker/).
-* The file `travis.yml` in this repo.
-* The file `Taskfile.yml` in this repo.
+Due to the fact that a DockerHub token cannot be scoped to a specific image repository, the leaking of such token from CI (for example: the secret environment variable is not redacted and appears in logs, or user misconfiguration, or vulnerability in the secure environment mechanism) gives to an adversary write access to all image repositories of the given DockerHub account.
+
+This problem is exacerbated if the source repository and especially the Travis build is publicly accessible.
 
 ## Releases, git and Docker tags
 
-With reference to the corresponding [repository on DockerHub](https://cloud.docker.com/repository/docker/marcomm/travis-go-dockerhub/general):
+With reference to the corresponding [image repository on DockerHub](https://hub.docker.com/r/marcomm/travis-go-dockerhub):
 
 Each time a commit is made on a branch, a new Docker image will be pushed with a tag corresponding to the branch name. This is done to enable integration testing of the image before merging. Said in another way: the Docker tag with the branch name always gives you an image built off the current tip of the branch.
 
@@ -55,10 +80,13 @@ $ git tag -a -m 'Release 0.0.2' v0.0.2
 git push origin v0.0.2
 ```
 
-### Currently missing features
+## Travis Docker build
 
-- Moving tags for partial semver, for example `1.2.3` is fixed, but `1.2` should give the latest release in the `1.2.x` series and `1` should give the latest release in the `1.x` series.
-- **BUG**: If you support two series of releases, say `1.2.x` and `1.3.x`, then tag `latest` will flip between the two series! Currently tag `latest` works fine as long as you support only one series of releases.
+See
+
+* The Travis documentation [Using Docker in Builds](https://docs.travis-ci.com/user/docker/).
+* The file `travis.yml` in this repo.
+* The file `Taskfile.yml` in this repo.
 
 ## Local build
 
@@ -92,3 +120,5 @@ $ envchain travis-docker task docker-build
 $ envchain travis-docker task docker-smoke
 $ envchain travis-docker task docker-push
 ```
+
+[travis encryption-keys]: https://docs.travis-ci.com/user/encryption-keys/
