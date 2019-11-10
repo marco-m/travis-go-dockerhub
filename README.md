@@ -13,6 +13,97 @@ Work in progress.
 - Moving stable tags, for example `1.2.3` is fixed, but `1.2` should give the latest release in the `1.2.x` series and `1` should give the latest release in the `1.x` series.
 - **BUG**: If you support two series of releases, say `1.2.x` and `1.3.x`, then tag `latest` will flip between the two series! Currently tag `latest` works fine as long as you support only one series of releases.
 
+## Commits, releases and git and Docker tags
+
+The following subsections use this [image repository on DockerHub].
+
+You should be able to reproduce the steps in the following examples.
+
+### Commits on a branch and moving Docker tag
+
+Each time a commit is made on a branch, the CI will will build a new Docker image and will push it with a tag corresponding to the branch name. This is done to enable integration testing of the image before merging. Said in another way: the Docker tag with the branch name always gives you an image built off the current tip of the branch.
+
+For example, let's create a new branch and push it:
+
+```console
+$ git checkout -b lucky-luke
+$ git commit --allow-empty -m 'hello' && git push
+```
+
+After the CI job has run:
+
+```console
+$ http https://hub.docker.com/v2/repositories/marcomm/travis-go-dockerhub/tags | jq -c '.results[] | {tag: .name, date: .last_updated}' | grep lucky
+
+{"tag":"lucky-luke","date":"2019-11-10T17:38:16.968925Z"}
+```
+
+Let's add another commit to the same branch:
+
+```console
+$ git commit --allow-empty -m 'hello 2' && git push
+```
+
+After the CI job has run, we can see that the same tag `lucky-luke` has moved (notice the most recent date):
+
+```console
+$ http https://hub.docker.com/v2/repositories/marcomm/travis-go-dockerhub/tags | jq -c '.results[] | {tag: .name, date: .last_updated}' | grep lucky
+
+{"tag":"lucky-luke","date":"2019-11-10T19:12:45.370935Z"}
+```
+
+### Making a release and the `latest` tag
+
+If a branch is tagged (you should tag only the default branch), a new Docker image will be built and will be pushed with two tags:
+
+1. Same Docker tag as the git tag, without the optional `v` prefix. For example, git tag `v1.2.3` will become Docker tag `1.2.3`.
+2. The `latest` Docker tag. If git tags are made only on the default branch, then Docker tag `latest` represents the latest release of the project, not the latest commit to the default branch. As such, it is as stable as pinning a specific release.
+
+Let's try. The current tags are:
+
+```console
+$ http https://hub.docker.com/v2/repositories/marcomm/travis-go-dockerhub/tags | jq -c '.results[] | {tag: .name, date: .last_updated}'
+
+{"tag":"latest","date":"2019-11-01T10:24:19.118637Z"}
+{"tag":"master","date":"2019-11-10T14:49:15.349985Z"}
+{"tag":"0.0.2","date":"2019-11-01T10:24:17.98732Z"}
+{"tag":"0.0.1","date":"2019-11-01T08:36:12.949899Z"}
+```
+
+The tag `latest` is less recent than the tag `master`. This is as expected, because not all merges to master generate a new release.
+
+Let's do a release:
+
+```console
+# Checkout the default branch
+$ git checkout master
+
+# Ensure that the working directory is clean
+$ git status
+
+# Ensure that you have nothing local that is not on remote.
+# (If you have something, inspect, push, wait for CI, take decision)
+$ git cherry -v
+
+# Tag next minor release and push it. This will trigger a CI build that will
+# recognize the tag `v.0.0.3`, strip the `v` and build a Docker image with 2 tags:
+# `latest` and `0.0.3`
+$ git tag -a -m 'Release 0.0.3' v0.0.3
+git push origin v0.0.3
+```
+
+After a successful CI:
+
+```console
+$ http https://hub.docker.com/v2/repositories/marcomm/travis-go-dockerhub/tags | jq -c '.results[] | {tag: .name, date: .last_updated}'
+
+{"tag":"0.0.1","date":"2019-11-01T08:36:12.949899Z"}
+{"tag":"master","date":"2019-11-10T14:49:15.349985Z"}
+{"tag":"0.0.2","date":"2019-11-01T10:24:17.98732Z"}
+{"tag":"0.0.3","date":"2019-11-10T19:55:30.961217Z"}   <== new image
+{"tag":"latest","date":"2019-11-10T19:55:32.108427Z"}  <== new image
+```
+
 ## Secure setup for secrets
 
 We need to give credentials to Travis to publish the Docker image to our DockerHub (or other Docker registry) account. We want to do it in such a way to preserve the secrecy of the credentials and to control what happens when somebody not belonging to the project issues a PR.
@@ -62,24 +153,6 @@ Due to the fact that a DockerHub token cannot be scoped to a specific image repo
 
 This problem is exacerbated if the source repository and especially the Travis build is publicly accessible.
 
-## Releases, git and Docker tags
-
-With reference to the corresponding [image repository on DockerHub](https://hub.docker.com/r/marcomm/travis-go-dockerhub):
-
-Each time a commit is made on a branch, a new Docker image will be pushed with a tag corresponding to the branch name. This is done to enable integration testing of the image before merging. Said in another way: the Docker tag with the branch name always gives you an image built off the current tip of the branch.
-
-Making a release.
-
-If a branch is tagged (you should tag only the default branch), a new Docker image will be built and will be pushed with two tags:
-
-1. Same Docker tag as the git tag, without the optional `v` prefix. For example, git tag `v1.2.3` will become DOcker tag `1.2.3`.
-2. The `latest` Docker tag. If git tags are made only on the default branch, then Docker tag `latest` represents the latest release of the project, not the latest commit to the default branch. As such, it is as stable as pinning a specific release.
-
-```
-$ git tag -a -m 'Release 0.0.2' v0.0.2
-git push origin v0.0.2
-```
-
 ## Travis Docker build
 
 See
@@ -122,3 +195,4 @@ $ envchain travis-docker task docker-push
 ```
 
 [travis encryption-keys]: https://docs.travis-ci.com/user/encryption-keys/
+[image repository on DockerHub]: https://hub.docker.com/r/marcomm/travis-go-dockerhub
