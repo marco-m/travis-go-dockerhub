@@ -12,8 +12,15 @@ $ http https://hub.docker.com/v2/repositories/marcomm/travis-go-dockerhub/tags |
   "date": "2019-11-01T10:24:17.98732Z"
 }
 
+* Rethink the examples, instead of using only the timestamp, use the image checksum...
+
+* tests within the container
+
+* Explain how to reproduce the CI build locally with the travis.sh script. Before doing that, think about if I need protections before pushing images...
 
 * Moving stable tags.
+
+I don't want to do this with shell scripts, sorry. I will do this after the pocket re project becomes a reality.
 
 Also the convention to use moving tags for all releases except a patch release, that I understand.
 
@@ -25,5 +32,3 @@ https://medium.com/@mccode/using-semantic-versioning-for-docker-image-tags-dfde8
     registry:latest
 
     When Docker pushes version 2.6.3, they will overwrite all but the 2.6.2 tag. 
-
-* tests within the container
